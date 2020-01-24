@@ -16,6 +16,6 @@ export class ScooterService {
       }/${formData.latitude}/${formData.longitude}/${
       formData.radiusMeters
       }/`;
-    return this.http.get<ScooterPosition[]>(url);
+    return this.http.get<ScooterPosition>(url);
   }
 }
