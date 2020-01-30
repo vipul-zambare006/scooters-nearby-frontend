@@ -4,7 +4,8 @@
 <div class="container">
   <div class="row pt-4">
     <div class="col-md-12">
-      <form class="form-group" [formGroup]="searchScooterForm">
+      <span>try: lat- 1.2775875, lng- 103.8429406</span>
+      <form class="form-group pt-4" [formGroup]="searchScooterForm">
         <div>
           <label>
             Enter number of scooters:
@@ -42,16 +43,22 @@
     </div>
   </div>
 
+  <div class="row pt-4" *ngIf="noDataFound$|async">
+    <div class="col-md-12">
+      <h4>No scooters found near specified location</h4>
+    </div>
+  </div>
+
   <div class="row pt-4">
     <div class="col-md-12">
       <div #providerMap [ngClass]="(showMap$|async)? 'scooter-map' : '' "></div>
     </div>
   </div>
-</div>
 
+</div>
 <router-outlet></router-outlet>
 
-<!-- <div class="">
+<div class="">
   Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a
     href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
-</div> -->
+</div>

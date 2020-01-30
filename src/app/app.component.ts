@@ -18,6 +18,7 @@ export class AppComponent implements OnInit {
 
   isSubmitting$ = new BehaviorSubject<boolean>(false);
   showMap$ = new BehaviorSubject<boolean>(false);
+  noDataFound$ = new BehaviorSubject<boolean>(false);
 
   searchScooterForm = new FormGroup({
     noOfScooters: new FormControl(undefined),
@@ -27,6 +28,7 @@ export class AppComponent implements OnInit {
   });
 
   private readonly circleColor = '#6b54b6';
+
 
   constructor(private scooterService: ScooterService) {
     this.scooters = [];
@@ -39,18 +41,24 @@ export class AppComponent implements OnInit {
     this.scooters = [];
 
     if (this.searchScooterForm && this.searchScooterForm.value) {
-      this.scooterService.getNearbyScooters(this.searchScooterForm).subscribe((data: ScooterPosition[]) => {
+      this.scooterService.getNearbyScooters(this.searchScooterForm).subscribe((data: ScooterPosition) => {
         this.toggleSubmit(false);
         this.showMap$.next(true);
 
-        data.forEach(foundScooter => {
-          this.scooters.push(this.getLatLng(foundScooter.latitude, foundScooter.longitude));
-        });
-        // this.displayMap(1.2775875, 103.8429406, data);
-        this.displayMap(this.searchScooterForm.value.latitude, this.searchScooterForm.value.longitude, data);
+        if (data && data.features) {
+          this.noDataFound$.next(false);
+          data.features.forEach(foundScooter => {
+            this.scooters.push(this.getLatLng(foundScooter.geometry.coordinates[1], foundScooter.geometry.coordinates[0]));
+          });
+          // this.displayMap(1.2775875, 103.8429406, data);
+          this.displayMap(this.searchScooterForm.value.latitude, this.searchScooterForm.value.longitude);
+        } else {
+          this.noDataFound$.next(true);
+        }
       },
         error => {
           console.log(error.message);
+          this.noDataFound$.next(true);
           this.toggleSubmit(false);
         });
     }
@@ -74,7 +82,7 @@ export class AppComponent implements OnInit {
     );
   }
 
-  private displayMap(latitude: number, longitude: number, scootersPositions: ScooterPosition[]) {
+  private displayMap(latitude: number, longitude: number) {
     const userlatLng = this.setMapConfiguration(latitude, longitude);
     const userLocationMarker = this.setUserLocationMarker(userlatLng);
     this.drawCircleOfDefinedRadius(userlatLng, userLocationMarker, this.searchScooterForm.value.radiusMeters);
@@ -86,7 +94,7 @@ export class AppComponent implements OnInit {
       const marker = new google.maps.Marker({
         position: scooter,
         title: 'location',
-        icon: 'assets/icons/scooter4.png'
+        icon: 'assets/icons/scooter.png'
       });
       marker.setMap(this.map);
     });
